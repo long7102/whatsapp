@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Laugh, Send } from "lucide-react";
 import { Input } from "../ui/input";
 import { useState } from "react";
