@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Laugh, Send } from "lucide-react";
 import { Input } from "../ui/input";
 import { useState } from "react";
@@ -32,9 +31,8 @@ const MessageInput = () => {
         sender: me!._id,
       });
       setMsgText(""); // Clear the message input after sending
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-
-    } catch (error: unknown) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: unknown | any) {
       toast.error(error.message); // Show error if sending fails
       console.log(error);
     } finally {
