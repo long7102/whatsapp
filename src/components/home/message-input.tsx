@@ -32,7 +32,9 @@ const MessageInput = () => {
         sender: me!._id,
       });
       setMsgText(""); // Clear the message input after sending
-    } catch (error: any) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
+    } catch (error: unknown) {
       toast.error(error.message); // Show error if sending fails
       console.log(error);
     } finally {
