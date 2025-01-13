@@ -38,58 +38,66 @@ const UserListDialog = () => {
 
 	const {setSelectedConversation} =useConversationStore()
 
-	const handleCreateConversation = async () => {
-		if (selectedUsers.length === 0) return;
-		setIsLoading(true);
-		try {
-			const isGroup = selectedUsers.length > 1
-			let conversationId 
-			if (!isGroup) {
-				conversationId = await createConversation({
-					participants: [...selectedUsers, me?._id!],
-					isGroup: false,
-				});
-			}
+const handleCreateConversation = async () => {
+	if (selectedUsers.length === 0) return;
+	setIsLoading(true);
+	try {
+		const isGroup = selectedUsers.length > 1;
+		let conversationId: Id<"conversations"> | undefined; // Explicitly define the type to handle the potential undefined
 
-			else{
-				const postUrl =await generateUploadUrl()
-				const result = await fetch(postUrl, {
-					method: "POST",
-					headers: { "Content-Type": selectedImage?.type! },
-					body: selectedImage
-				})
-				const {storageId} = await result.json()
-				await createConversation({
-					participants: [...selectedUsers, me?._id!],
-					isGroup: true,
-					admin: me?._id!,
-					groupName,
-					groupImage: storageId
-				})
-			}
-			//nếu có nhóm thì lấy tên nhóm, còn không thì lấy tên người dùng
-			const conversationName = isGroup ? groupName : users?.find((user) => user._id === selectedUsers[0])?.name;
-
-			setSelectedConversation({
-				_id: conversationId,
-				participants: selectedUsers,
-				isGroup,
-				image: isGroup ? renderedImage : users?.find((user) => user._id === selectedUsers[0])?.image,
-				name: conversationName,
-				admin: me?._id!,
+		if (!isGroup) {
+			conversationId = await createConversation({
+				participants: [...selectedUsers, me?._id!],
+				isGroup: false,
 			});
-
-			dialogCloseRef.current?.click();
-			setSelectedUsers([]);
-			setGroupName("");
-			setSelectedImage(null);
-			toast.success("Tạo mới cuộc trò chuyện thành công")
-		} catch (error) {
-			toast.error("Tạo mới cuộc trò chuyện thất bại")
-		} finally {
-			setIsLoading(false)
+		} else {
+			const postUrl = await generateUploadUrl();
+			const result = await fetch(postUrl, {
+				method: "POST",
+				headers: { "Content-Type": selectedImage?.type! },
+				body: selectedImage,
+			});
+			const { storageId } = await result.json();
+			conversationId = await createConversation({
+				participants: [...selectedUsers, me?._id!],
+				isGroup: true,
+				admin: me?._id!,
+				groupName,
+				groupImage: storageId,
+			});
 		}
+
+		if (!conversationId) {
+			throw new Error("Failed to create conversation.");
+		}
+
+		// Ensure conversationId is valid before using it
+		const conversationName = isGroup
+			? groupName
+			: users?.find((user) => user._id === selectedUsers[0])?.name;
+
+		setSelectedConversation({
+			_id: conversationId,
+			participants: selectedUsers,
+			isGroup,
+			image: isGroup
+				? renderedImage
+				: users?.find((user) => user._id === selectedUsers[0])?.image,
+			name: conversationName,
+			admin: me?._id!,
+		});
+
+		dialogCloseRef.current?.click();
+		setSelectedUsers([]);
+		setGroupName("");
+		setSelectedImage(null);
+		toast.success("Tạo mới cuộc trò chuyện thành công");
+	} catch (error) {
+		toast.error("Tạo mới cuộc trò chuyện thất bại");
+	} finally {
+		setIsLoading(false);
 	}
+};
 
 
 	useEffect(() => {
