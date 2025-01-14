@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
+import { useEffect, useRef, useState } from "react";
 import { randomID } from "@/lib/utils";
 import { useClerk } from "@clerk/nextjs";
 import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
@@ -11,19 +12,30 @@ export function getUrlParams(url = window.location.href) {
 export default function VideoUIKit() {
 	const roomID = getUrlParams().get("roomID") || randomID(5);
 	const { user } = useClerk();
+	const [isInitialized, setIsInitialized] = useState(false);
+	const containerRef = useRef<HTMLDivElement | null>(null);
 
-	const myMeeting = (element: HTMLDivElement) => {
+	useEffect(() => {
 		const initMeeting = async () => {
+			// Ngăn việc khởi tạo lại
+			if (isInitialized || !containerRef.current) return;
+
 			const res = await fetch(`/api/zegocloud?userID=${user?.id}`);
 			const { token, appID } = await res.json();
 
 			const username = user?.fullName || user?.emailAddresses[0].emailAddress.split("@")[0];
 
-			const kitToken = ZegoUIKitPrebuilt.generateKitTokenForProduction(appID, token, roomID, user?.id!, username);
+			const kitToken = ZegoUIKitPrebuilt.generateKitTokenForProduction(
+				appID,
+				token,
+				roomID,
+				user?.id!,
+				username
+			);
 
 			const zp = ZegoUIKitPrebuilt.create(kitToken);
 			zp.joinRoom({
-				container: element,
+				container: containerRef.current,
 				sharedLinks: [
 					{
 						name: "Personal link",
@@ -37,12 +49,21 @@ export default function VideoUIKit() {
 					},
 				],
 				scenario: {
-					mode: ZegoUIKitPrebuilt.GroupCall, // To implement 1-on-1 calls, modify the parameter here to [ZegoUIKitPrebuilt.OneONoneCall].
+					mode: ZegoUIKitPrebuilt.GroupCall, // Thay đổi nếu cần 1-on-1 call
 				},
 			});
-		};
-		initMeeting();
-	};
 
-	return <div className='myCallContainer' ref={myMeeting} style={{ width: "100vw", height: "100vh" }}></div>;
+			setIsInitialized(true); // Đánh dấu đã khởi tạo
+		};
+
+		initMeeting();
+	}, [isInitialized, user, roomID]);
+
+	return (
+		<div
+			className="myCallContainer"
+			ref={containerRef}
+			style={{ width: "100vw", height: "100vh" }}
+		></div>
+	);
 }
