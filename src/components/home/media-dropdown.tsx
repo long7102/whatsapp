@@ -166,7 +166,7 @@ const MediaImageDialog = ({ isOpen, onClose, selectedImage, isLoading, handleSen
 				<DialogDescription className='flex flex-col gap-10 justify-center items-center'>
 					{renderedImage && <Image src={renderedImage} width={300} height={300} alt='selected image' />}
 					<Button className='w-full' disabled={isLoading} onClick={handleSendImage}>
-						{isLoading ? "Đang gửi..." : "Đã gửi"}
+						{isLoading ? "Đang gửi..." : "Gửi"}
 					</Button>
 				</DialogDescription>
 			</DialogContent>
