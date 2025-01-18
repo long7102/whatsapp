@@ -92,7 +92,7 @@ export const getMe = query({
 		throw new ConvexError("Unauthorized");
 	  }
 	  //tách chuỗi, lấy từ kí tự số 3 trở đi (sau https://) để match với tokenIdentifier trong database
-	  const token = identity.tokenIdentifier.split("/")[2];
+	  const token = identity.tokenIdentifier;
   
 	  const user = await ctx.db
 		.query("users")
